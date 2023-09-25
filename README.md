@@ -1,5 +1,5 @@
-# Python Trader Excel Based Trade Terminal
-This is the repo of the `Python Trader Excel Based Trade Terminal` **Source Code** 
+# Python Trader's Excel Based Trade Terminal For Zerodha And Finvasia [For FREE]
+This is the repo of the FREE `Python Trader's Excel Based Trade Terminal For Zerodha And Finvasia` **Source Code** 
 
 ![Python Trader](PythonTraderGroup.jpeg "[Python Trader](https://t.me/pythontrader)")
 
