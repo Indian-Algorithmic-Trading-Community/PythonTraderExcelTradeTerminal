@@ -1,13 +1,23 @@
 # Python Trader's Finvasia Excel Based Trade Terminal [FREE]
 This is the repo of the FREE `Python Trader's Finvasia Excel Based Trade Terminal` **Source Code** 
 
-![Python Trader](../PythonTraderGroup.jpeg "[Python Trader](https://t.me/pythontrader)")
+
+### Watch The Youtube Video For More Details On How To Install & Use Finvasia Excel Trade Terminal V3
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=mPLBCT_Cxbw" target="_blank">
+ <img src="../.assets/thumbnails/finvasia_ttv3_thumbnail.png" alt="Watch the video" width="1000" height="500" border="10" />
+</a>
+
 
 ## Telegram Link
 [Python Trader](https://t.me/pythontrader)
 
 ## Youtube Channel
 [Python Trader](https://youtube.com/@pythontraders)
+
+## Python Trader Logo
+<a href="https://t.me/pythontrader" target="_blank">
+ <img src="../PythonTraderGroup.jpeg" alt="Python Tradero" width="200" height="200" border="10" />
+</a>
 
 
 #### License
