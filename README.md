@@ -1,5 +1,13 @@
 # Python Trader Excel Based Trade Terminal
-This is the repo of the `Python Trader Excel Based Trade Terminal` **Source Code**
+This is the repo of the `Python Trader Excel Based Trade Terminal` **Source Code** 
+
+![Python Trader](PythonTraderGroup.jpeg "[Python Trader](https://t.me/pythontrader)")
+
+## Telegram Link
+[Python Trader](https://t.me/pythontrader)
+
+## Youtube Channel
+[Python Trader](https://youtube.com/@pythontraders)
 
 
 #### License
