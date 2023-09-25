@@ -9,7 +9,7 @@ This is the repo of the FREE `Python Trader's Zerodha Excel Based Trade Terminal
 
 ## Python Trader Logo
 <a href="https://t.me/pythontrader" target="_blank">
- <img src=".assets/thumbnails/PythonTraderGroup.jpeg" alt="Python Tradero" width="200" height="200" border="10" />
+ <img src="../.assets/thumbnails/PythonTraderGroup.jpeg" alt="Python Tradero" width="200" height="200" border="10" />
 </a>
 
 
