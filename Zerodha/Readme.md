@@ -1,13 +1,16 @@
 # Python Trader's Zerodha Excel Based Trade Terminal [FREE]
 This is the repo of the FREE `Python Trader's Zerodha Excel Based Trade Terminal` **Source Code** 
 
-![Python Trader](../PythonTraderGroup.jpeg "[Python Trader](https://t.me/pythontrader)")
-
 ## Telegram Link
 [Python Trader](https://t.me/pythontrader)
 
 ## Youtube Channel
 [Python Trader](https://youtube.com/@pythontraders)
+
+## Python Trader Logo
+<a href="https://t.me/pythontrader" target="_blank">
+ <img src=".assets/thumbnails/PythonTraderGroup.jpeg" alt="Python Tradero" width="200" height="200" border="10" />
+</a>
 
 
 #### License
