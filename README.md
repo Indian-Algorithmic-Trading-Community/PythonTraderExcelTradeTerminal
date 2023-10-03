@@ -2,17 +2,22 @@
 This is the repo of the FREE `Python Trader's Excel Based Trade Terminal For Zerodha And Finvasia` **Source Code** 
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=iMVLyfRUE7E" target="_blank">
- <img src=".assets/thumbnails/finvasia_ttv3_thumbnail_1.png" alt="Watch the video" width="1000" height="450" border="10" />
+ <img src=".assets/thumbnails/zerodha_ttv3_thumbnail_1.jpeg" alt="Watch the zerodha trade terminal v3 source code reveal video" width="1000" height="525" border="10" />
+</a>
+
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=iMVLyfRUE7E" target="_blank">
+ <img src=".assets/thumbnails/finvasia_ttv3_thumbnail_1.png" alt="Watch the finvasia trade terminal v3 source code reveal video" width="1000" height="450" border="10" />
 </a>
 
 ### Watch The Youtube Video For More Details On How To Install & Use Finvasia Excel Trade Terminal V3
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=mPLBCT_Cxbw" target="_blank">
- <img src=".assets/thumbnails/finvasia_ttv3_thumbnail.png" alt="Watch the video" width="1000" height="450" border="10" />
+ <img src=".assets/thumbnails/finvasia_ttv3_thumbnail.png" alt="Watch The Youtube Video For More Details On How To Install & Use Finvasia Excel Trade Terminal V3" width="1000" height="450" border="10" />
 </a>
 
 ### Watch The Youtube Video For More Details On How To Install & Use Zerodha Excel Trade Terminal V3
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=2MgPtQijtCw" target="_blank">
- <img src=".assets/thumbnails/zerodha_ttv3_thumbnail.png" alt="Watch the video" width="1000" height="450" border="10" />
+ <img src=".assets/thumbnails/zerodha_ttv3_thumbnail.png" alt="Watch The Youtube Video For More Details On How To Install & Use Zerodha Excel Trade Terminal V3" width="1000" height="450" border="10" />
 </a>
 
 ## Telegram Link
