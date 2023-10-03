@@ -1,7 +1,7 @@
 # Python Trader's Excel Based Trade Terminal For Zerodha And Finvasia [For FREE]
 This is the repo of the FREE `Python Trader's Excel Based Trade Terminal For Zerodha And Finvasia` **Source Code** 
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=iMVLyfRUE7E" target="_blank">
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=2BROK1vGpq0" target="_blank">
  <img src=".assets/thumbnails/zerodha_ttv3_thumbnail_1.png" alt="Watch the zerodha trade terminal v3 source code reveal video" width="1000" height="450" border="10" />
 </a>
 
