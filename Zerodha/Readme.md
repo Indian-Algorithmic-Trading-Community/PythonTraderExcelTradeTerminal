@@ -1,6 +1,7 @@
 # Python Trader's Zerodha Excel Based Trade Terminal [FREE]
 This is the repo of the FREE `Python Trader's Zerodha Excel Based Trade Terminal` **Source Code** 
 
+### Watch The Youtube Video Of Zerodha Excel Trade Terminal V3 [Source Reveal For Free / Open Sourced]
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=2BROK1vGpq0" target="_blank">
  <img src="../.assets/thumbnails/zerodha_ttv3_thumbnail_1.png" alt="Watch the zerodha trade terminal v3 source code reveal video" width="1000" height="450" border="10" />
 </a>
