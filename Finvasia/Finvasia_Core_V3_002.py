@@ -39,6 +39,7 @@ from datetime import datetime as dt, timedelta, time, date
 from time import sleep
 import logging
 from threading import Thread
+import numpy as np
 
 try:
     import pandas as pd
@@ -105,9 +106,9 @@ OptionChain_template = []
 subs_lst = []
 subs_pending_lst = []
 
-Indices_To_check_instrument_Sheet = ['NIFTY','BANKNIFTY']
-IndexList = ["NIFTY", "BANKNIFTY", "FINNIFTY",'INDIAVIX','MIDCPNIFTY']
-Token_list = {'NIFTY':26000,'MIDCPNIFTY':26000,'BANKNIFTY':26009,'FINNIFTY':26037,'INDIAVIX':26017}    
+Indices_To_check_instrument_Sheet = ['NIFTY','BANKNIFTY',"SENSEX" "SENSEX50", "BANKEX"]
+IndexList = ["NIFTY", "BANKNIFTY", "FINNIFTY",'INDIAVIX','MIDCPNIFTY', "SENSEX", "SENSEX50", "BANKEX"]
+Token_list = {'NIFTY':26000,'MIDCPNIFTY':26000,'BANKNIFTY':26009,'FINNIFTY':26037,'INDIAVIX':26017, "SENSEX":1, "SENSEX50":47, "BANKEX":12}    
 
 try:
     TerminalSheetName = sys.argv[1]
@@ -373,6 +374,12 @@ def order_status(orderid):
         print(Message)
     return status, AverageExecutedPrice
 
+def convert_to_float(string: str) -> float:
+    try:
+        return float(string)
+    except ValueError:
+        return 0.0
+
 def place_trade(symbol, quantity, buy_or_sell, order_type = None, price = None):
     global api
     global Product_type
@@ -476,7 +483,7 @@ def get_order_book():
     return df_order_book
 
 def GetToken_UsingSymbol(exchange, tradingsymbol):
-    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX
+    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX, df_ins_BFO
     global api
     try:
         if exchange == 'NSE':
@@ -487,6 +494,9 @@ def GetToken_UsingSymbol(exchange, tradingsymbol):
             Token = df_ins_temp.iloc[0]['Token']
         elif exchange == 'NFO':
             df_ins_temp = df_ins_NFO[df_ins_NFO.TradingSymbol == tradingsymbol]
+            Token = df_ins_temp.iloc[0]['Token']
+        elif exchange == 'BFO':
+            df_ins_temp = df_ins_BFO[df_ins_BFO.TradingSymbol == tradingsymbol]
             Token = df_ins_temp.iloc[0]['Token']
         elif exchange == 'CDS':
             df_ins_temp = df_ins_CDS[df_ins_CDS.TradingSymbol == tradingsymbol]
@@ -1316,8 +1326,8 @@ def get_position():
         print(f"Error in get_position: {e}")
     return df_positions,day_m2m 
 
-def LoadInstrument_token(Token_4_Exchange = ['NSE','BSE','NFO','CDS','MCX']):
-    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX
+def LoadInstrument_token(Token_4_Exchange = ['NSE','BSE','NFO', 'BFO','CDS','MCX']):
+    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_BFO,df_ins_CDS, df_ins_MCX
     global api
 
     try:
@@ -1370,6 +1380,27 @@ def LoadInstrument_token(Token_4_Exchange = ['NSE','BSE','NFO','CDS','MCX']):
                 df_ins_NFO.to_csv(os.path.join(subdir,"NFO_symbols.csv"),index = False)
             except:
                 pass
+
+        if 'BFO' in Token_4_Exchange:
+            #reading nfo instrument symbol
+            zip_file = "BFO_symbols.txt.zip"
+            url = f"https://api.shoonya.com/{zip_file}"
+            r = requests.get(f"{url}", allow_redirects=True)
+            open(zip_file, "wb").write(r.content)
+            df_ins_BFO = pd.read_csv(zip_file, usecols=["Exchange", "Token", "LotSize", "TradingSymbol", "Expiry", "Instrument", "OptionType", "StrikePrice", "TickSize"])            
+            bfo_symbols = np.where(
+                                df_ins_BFO['TradingSymbol'].str.contains('SENSEX50', regex=False), 'SENSEX50',
+                                df_ins_BFO['TradingSymbol'].str.extract(r'(.*?)(?:\d)', expand=False)
+                                )
+            df_ins_BFO.insert(3, "Symbol", bfo_symbols)
+            df_ins_BFO['Expiry'] = pd.to_datetime(df_ins_BFO['Expiry']).apply(lambda x: x.date())
+            df_ins_BFO = df_ins_BFO.sort_values(by=['Expiry',"Symbol",'StrikePrice'], ascending=[True,True,True])
+            df_ins_BFO = df_ins_BFO.astype({"StrikePrice": str}) 
+            os.remove(zip_file)
+            try:
+                df_ins_BFO.to_csv(os.path.join(subdir,"BFO_symbols.csv"),index = False)
+            except:
+                pass
                 
         if 'CDS' in Token_4_Exchange:
             #reading CDS instrument symbol
@@ -1413,7 +1444,7 @@ def start_optionchain():
     global subscribe_symbol
     global live_data
     global df_ins_NFO
-    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX
+    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX, df_ins_BFO
     
     global subs_lst
     excel_name = xw.Book(TerminalSheetName)
@@ -1441,7 +1472,7 @@ def start_optionchain():
         try:
             selected_segment = oci.range("E2").value
             Exchange = selected_segment[:3]
-            if Exchange not in ['NFO','CDS','MCX']:
+            if Exchange not in ['NFO','CDS','MCX', 'BFO']:
                 Exchange = 'NFO'
             
             oci.range("F2").value = None
@@ -1451,12 +1482,16 @@ def start_optionchain():
                 df_instrument = df_ins_CDS
             elif Exchange == 'MCX':
                 df_instrument = df_ins_MCX
+            elif Exchange == 'BFO':
+                df_instrument = df_ins_BFO
             else:
                 oci.range("F2").value = "Please select correct segment"
             #print(f"pre : pre_selected_segment = {pre_selected_segment}, selected_segment={selected_segment}")
             if pre_selected_segment != selected_segment:
                 if Exchange == 'NFO':
                     df_symbol = df_ins_NFO
+                if Exchange == 'BFO':
+                    df_symbol = df_ins_BFO                
                 if Exchange == 'CDS':
                     df_symbol = df_ins_CDS[df_ins_CDS['Instrument'] == 'UNDCUR']
                 if Exchange == 'MCX':
@@ -1653,12 +1688,15 @@ def start_optionchain():
                                 #print(f"isFound {isFound} Fut_Token {Fut_Token}")
                                 if Exchange == 'NFO':
                                     isFound, Spot_Token = GetToken('NSE',input_symbol)
-                                    spot_ltp = float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
+                                    spot_ltp = convert_to_float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
+                                elif Exchange == 'BFO':
+                                    isFound, Spot_Token = GetToken('BSE',input_symbol)
+                                    spot_ltp = convert_to_float(api.get_quotes("BSE", str(Spot_Token)).get("lp"))
                                 else:    
                                     Spot_Token = Fut_Token
-                                    spot_ltp = float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
+                                    spot_ltp = convert_to_float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
                                 #print(f"Spot_Token {Spot_Token} spot_ltp {spot_ltp}")
-                                future_ltp = float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
+                                future_ltp = convert_to_float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
                                 
                                 #print(f"{input_symbol} spot ltp = {spot_ltp} future ltp = {future_ltp}")
 
@@ -1837,9 +1875,9 @@ def start_optionchain():
                                 df_oc_pro.sort_values(by = 'strike_diff',inplace = True)
                                 
                                 #print(f"\n\n***\n\n{df_oc_pro}")
-                                AtmStrike = float(df_oc_pro.iloc[0]['strike'])
-                                AtmStrikeCallPrice = float(df_oc_pro.iloc[0]['CE_lp'])
-                                AtmStrikePutPrice = float(df_oc_pro.iloc[0]['PE_lp'])
+                                AtmStrike = convert_to_float(df_oc_pro.iloc[0]['strike'])
+                                AtmStrikeCallPrice = convert_to_float(df_oc_pro.iloc[0]['CE_lp'])
+                                AtmStrikePutPrice = convert_to_float(df_oc_pro.iloc[0]['PE_lp'])
                                 
                                 #additional detail related to dump on input page
                                 Future_LTP = future_ltp
@@ -1950,8 +1988,8 @@ def start_optionchain():
                     
                                 df_oc_pro = df_oc_pro.reindex(['CE_Delta','CE_Gamma','CE_Theta','CE_Vega','CE_Rho','CE_oi','CE_coi','CE_v','CE_IV','CE_lp','CE_pc','CE_bq1','CE_bp1','CE_sp1','CE_sq1','strike','PE_bq1','PE_bp1','PE_sp1','PE_sq1','PE_pc','PE_lp','PE_IV','PE_v','PE_coi','PE_oi','PE_Rho','PE_Vega','PE_Theta','PE_Gamma','PE_Delta'], axis=1)
                                 
-                                SpotPrice = float(spot_ltp)
-                                FuturePrice = float(future_ltp)
+                                SpotPrice = convert_to_float(spot_ltp)
+                                FuturePrice = convert_to_float(future_ltp)
                                 ExpiryDateTime = dt(expiry_input.year, expiry_input.month, expiry_input.day, 0, 0, 0)
                                 
                                 #print(f"SpotPrice = {SpotPrice}, FuturePrice={FuturePrice}, AtmStrike={AtmStrike}, AtmStrikeCallPrice={AtmStrikeCallPrice}, AtmStrikePutPrice={AtmStrikePutPrice}, ExpiryDateTime={ExpiryDateTime}")
@@ -1983,9 +2021,9 @@ def start_optionchain():
                                 
                                 for ind in df_oc_pro.index:
                                     
-                                    StrikePrice= float(df_oc_pro['strike'][ind])
-                                    StrikeCallPrice= float(df_oc_pro['CE_lp'][ind])
-                                    StrikePutPrice= float(df_oc_pro['PE_lp'][ind])
+                                    StrikePrice= convert_to_float(df_oc_pro['strike'][ind])
+                                    StrikeCallPrice= convert_to_float(df_oc_pro['CE_lp'][ind])
+                                    StrikePutPrice= convert_to_float(df_oc_pro['PE_lp'][ind])
                                     #print(f"StrikePrice={StrikePrice}, StrikeCallPrice={StrikeCallPrice}, StrikePutPrice={StrikePutPrice}")
                                     Greeks = IvGreeks.GetImpVolAndGreeks( StrikePrice = StrikePrice, StrikeCallPrice = StrikeCallPrice, StrikePutPrice = StrikePutPrice)
                                     #print(Greeks)
@@ -2075,7 +2113,7 @@ def start_optionchain():
         
 def GetToken(Exchange,Symbol, Type = 'FUT' ,Expiry=None,Strike = None):
     #print(f"GetToken called with parametrer \nExchange = {Exchange}, Symbol = {Symbol}")
-    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX
+    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX, df_ins_BFO
     try:
         Token = None
         isTokenFound = False
@@ -2091,12 +2129,22 @@ def GetToken(Exchange,Symbol, Type = 'FUT' ,Expiry=None,Strike = None):
                     isTokenFound = True
         
         elif Exchange == 'BSE':
-            df_ins_temp = df_ins_BSE[df_ins_BSE.Symbol == Symbol]
-            if len(df_ins_temp) > 0:
-                Token = df_ins_temp.iloc[0]['Token']
+            if Symbol in IndexList:    
+                Token = Token_list[Symbol]
                 isTokenFound = True
+            else:
+                df_ins_temp = df_ins_BSE[df_ins_BSE.Symbol == Symbol]
+                if len(df_ins_temp) > 0:
+                    Token = df_ins_temp.iloc[0]['Token']
+                    isTokenFound = True
         elif Exchange == 'NFO':
             df_ins_temp = df_ins_NFO[(df_ins_NFO.Symbol == Symbol) & (df_ins_NFO['Instrument'].isin(['FUTIDX','FUTSTK']))]
+            if len(df_ins_temp) > 0:
+                df_ins_temp.sort_values(by = 'Expiry',inplace = True)
+                Token = df_ins_temp.iloc[0]['Token']
+                isTokenFound = True
+        elif Exchange == 'BFO':
+            df_ins_temp = df_ins_BFO[(df_ins_BFO.Symbol == Symbol) & (df_ins_BFO['Instrument'].isin(['FUTIDX','FUTSTK']))]
             if len(df_ins_temp) > 0:
                 df_ins_temp.sort_values(by = 'Expiry',inplace = True)
                 Token = df_ins_temp.iloc[0]['Token']
@@ -2123,7 +2171,7 @@ def start_optionchain_Pro():
     global subscribe_symbol
     global live_data
     global df_ins_NFO
-    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX
+    global df_ins_NSE, df_ins_BSE, df_ins_NFO, df_ins_CDS, df_ins_MCX, df_ins_BFO
     
     global subs_lst
     excel_name = xw.Book(TerminalSheetName)
@@ -2151,7 +2199,7 @@ def start_optionchain_Pro():
         try:
             selected_segment = oci_pro.range("E2").value
             Exchange = selected_segment[:3]
-            if Exchange not in ['NFO','CDS','MCX']:
+            if Exchange not in ['NFO','CDS','MCX','BFO']:
                 Exchange = 'NFO'
             
             oci_pro.range("F2").value = None
@@ -2161,12 +2209,16 @@ def start_optionchain_Pro():
                 df_instrument = df_ins_CDS
             elif Exchange == 'MCX':
                 df_instrument = df_ins_MCX
+            elif Exchange == 'BFO':
+                df_instrument = df_ins_BFO
             else:
                 oci_pro.range("F2").value = "Please select correct segment"
             #print(f"pre : pre_selected_segment = {pre_selected_segment}, selected_segment={selected_segment}")
             if pre_selected_segment != selected_segment:
                 if Exchange == 'NFO':
                     df_symbol = df_ins_NFO
+                if Exchange == 'BFO':
+                    df_symbol = df_ins_BFO
                 if Exchange == 'CDS':
                     df_symbol = df_ins_CDS[df_ins_CDS['Instrument'] == 'UNDCUR']
                 if Exchange == 'MCX':
@@ -2363,12 +2415,15 @@ def start_optionchain_Pro():
                                 #print(f"isFound {isFound} Fut_Token {Fut_Token}")
                                 if Exchange == 'NFO':
                                     isFound, Spot_Token = GetToken('NSE',input_symbol)
-                                    spot_ltp = float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
+                                    spot_ltp = convert_to_float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
+                                if Exchange == 'BFO':
+                                    isFound, Spot_Token = GetToken('BSE',input_symbol)
+                                    spot_ltp = convert_to_float(api.get_quotes("BSE", str(Spot_Token)).get("lp"))
                                 else:    
                                     Spot_Token = Fut_Token
-                                    spot_ltp = float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
+                                    spot_ltp = convert_to_float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
                                 #print(f"Spot_Token {Spot_Token} spot_ltp {spot_ltp}")
-                                future_ltp = float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
+                                future_ltp = convert_to_float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
                                 
                                 #print(f"{input_symbol} spot ltp = {spot_ltp} future ltp = {future_ltp}")
 
@@ -2547,9 +2602,9 @@ def start_optionchain_Pro():
                                 df_oc_pro.sort_values(by = 'strike_diff',inplace = True)
                                 
                                 #print(f"\n\n***\n\n{df_oc_pro}")
-                                AtmStrike = float(df_oc_pro.iloc[0]['strike'])
-                                AtmStrikeCallPrice = float(df_oc_pro.iloc[0]['CE_lp'])
-                                AtmStrikePutPrice = float(df_oc_pro.iloc[0]['PE_lp'])
+                                AtmStrike = convert_to_float(df_oc_pro.iloc[0]['strike'])
+                                AtmStrikeCallPrice = convert_to_float(df_oc_pro.iloc[0]['CE_lp'])
+                                AtmStrikePutPrice = convert_to_float(df_oc_pro.iloc[0]['PE_lp'])
                                 
                                 #additional detail related to dump on input page
                                 Future_LTP = future_ltp
@@ -2660,8 +2715,8 @@ def start_optionchain_Pro():
                     
                                 df_oc_pro = df_oc_pro.reindex(['CE_Delta','CE_Gamma','CE_Theta','CE_Vega','CE_Rho','CE_oi','CE_coi','CE_v','CE_IV','CE_lp','CE_pc','CE_bq1','CE_bp1','CE_sp1','CE_sq1','strike','PE_bq1','PE_bp1','PE_sp1','PE_sq1','PE_pc','PE_lp','PE_IV','PE_v','PE_coi','PE_oi','PE_Rho','PE_Vega','PE_Theta','PE_Gamma','PE_Delta'], axis=1)
                                 
-                                SpotPrice = float(spot_ltp)
-                                FuturePrice = float(future_ltp)
+                                SpotPrice = convert_to_float(spot_ltp)
+                                FuturePrice = convert_to_float(future_ltp)
                                 ExpiryDateTime = dt(expiry_input.year, expiry_input.month, expiry_input.day, 0, 0, 0)
                                 
                                 #print(f"SpotPrice = {SpotPrice}, FuturePrice={FuturePrice}, AtmStrike={AtmStrike}, AtmStrikeCallPrice={AtmStrikeCallPrice}, AtmStrikePutPrice={AtmStrikePutPrice}, ExpiryDateTime={ExpiryDateTime}")
@@ -2693,9 +2748,9 @@ def start_optionchain_Pro():
                                 
                                 for ind in df_oc_pro.index:
                                     
-                                    StrikePrice= float(df_oc_pro['strike'][ind])
-                                    StrikeCallPrice= float(df_oc_pro['CE_lp'][ind])
-                                    StrikePutPrice= float(df_oc_pro['PE_lp'][ind])
+                                    StrikePrice= convert_to_float(df_oc_pro['strike'][ind])
+                                    StrikeCallPrice= convert_to_float(df_oc_pro['CE_lp'][ind])
+                                    StrikePutPrice= convert_to_float(df_oc_pro['PE_lp'][ind])
                                     #print(f"StrikePrice={StrikePrice}, StrikeCallPrice={StrikeCallPrice}, StrikePutPrice={StrikePutPrice}")
                                     Greeks = IvGreeks.GetImpVolAndGreeks( StrikePrice = StrikePrice, StrikeCallPrice = StrikeCallPrice, StrikePutPrice = StrikePutPrice)
                                     #print(Greeks)
