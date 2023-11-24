@@ -378,7 +378,7 @@ def convert_to_float(string: str) -> float:
     try:
         return float(string)
     except ValueError:
-        return 0.0
+        return 0
 
 def place_trade(symbol, quantity, buy_or_sell, order_type = None, price = None):
     global api
@@ -1382,7 +1382,7 @@ def LoadInstrument_token(Token_4_Exchange = ['NSE','BSE','NFO', 'BFO','CDS','MCX
                 pass
 
         if 'BFO' in Token_4_Exchange:
-            #reading nfo instrument symbol
+            #reading bfo instrument symbol
             zip_file = "BFO_symbols.txt.zip"
             url = f"https://api.shoonya.com/{zip_file}"
             r = requests.get(f"{url}", allow_redirects=True)
