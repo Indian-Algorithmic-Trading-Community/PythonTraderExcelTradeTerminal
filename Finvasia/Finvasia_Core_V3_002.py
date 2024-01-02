@@ -29,7 +29,8 @@ Market_Safety = 1
 import warnings
 warnings.filterwarnings("ignore")
 
-from NorenRestApiPy.NorenApi import NorenApi
+#from NorenRestApiPy.NorenApi import NorenApi
+from Noren import NorenApi
 import os
 import time
 import json
@@ -108,7 +109,7 @@ subs_pending_lst = []
 
 Indices_To_check_instrument_Sheet = ['NIFTY','BANKNIFTY',"SENSEX" "SENSEX50", "BANKEX"]
 IndexList = ["NIFTY", "BANKNIFTY", "FINNIFTY",'INDIAVIX','MIDCPNIFTY', "SENSEX", "SENSEX50", "BANKEX"]
-Token_list = {'NIFTY':26000,'MIDCPNIFTY':26000,'BANKNIFTY':26009,'FINNIFTY':26037,'INDIAVIX':26017, "SENSEX":1, "SENSEX50":47, "BANKEX":12}    
+Token_list = {'NIFTY':26000,'MIDCPNIFTY':26074,'BANKNIFTY':26009,'FINNIFTY':26037,'INDIAVIX':26017, "SENSEX":1, "SENSEX50":47, "BANKEX":12}    
 
 try:
     TerminalSheetName = sys.argv[1]
@@ -282,6 +283,12 @@ Voice_Message = []
 TelegramBotCredential = None
 ReceiverTelegramID = None
 
+def convert_to_float(item):
+    try:
+        return float(item)
+    except (ValueError, TypeError):
+        return 0
+
 def SendMessageToTelegram(Message):
     #print(f"SendMessageToTelegram = {Message}")
     global TelegramBotCredential, ReceiverTelegramID
@@ -373,12 +380,6 @@ def order_status(orderid):
         Message = str(e) + " : Exception occur in order_status"
         print(Message)
     return status, AverageExecutedPrice
-
-def convert_to_float(string: str) -> float:
-    try:
-        return float(string)
-    except ValueError:
-        return 0
 
 def place_trade(symbol, quantity, buy_or_sell, order_type = None, price = None):
     global api
@@ -1382,7 +1383,7 @@ def LoadInstrument_token(Token_4_Exchange = ['NSE','BSE','NFO', 'BFO','CDS','MCX
                 pass
 
         if 'BFO' in Token_4_Exchange:
-            #reading bfo instrument symbol
+            #reading nfo instrument symbol
             zip_file = "BFO_symbols.txt.zip"
             url = f"https://api.shoonya.com/{zip_file}"
             r = requests.get(f"{url}", allow_redirects=True)
@@ -1702,7 +1703,7 @@ def start_optionchain():
 
                                 for strike_dict in List_of_particular_expiry_strike:
                                     
-                                    Strike = float(strike_dict.get("strike"))
+                                    Strike = convert_to_float(strike_dict.get("strike"))
                                     #print(Strike)
                                     PE_Token = strike_dict.get("PE_Token")
                                     PE_Token = str(Exchange)+ "|"  + str(PE_Token)
@@ -2415,21 +2416,21 @@ def start_optionchain_Pro():
                                 #print(f"isFound {isFound} Fut_Token {Fut_Token}")
                                 if Exchange == 'NFO':
                                     isFound, Spot_Token = GetToken('NSE',input_symbol)
-                                    spot_ltp = convert_to_float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
+                                    spot_ltp = float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
                                 if Exchange == 'BFO':
                                     isFound, Spot_Token = GetToken('BSE',input_symbol)
                                     spot_ltp = convert_to_float(api.get_quotes("BSE", str(Spot_Token)).get("lp"))
                                 else:    
                                     Spot_Token = Fut_Token
-                                    spot_ltp = convert_to_float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
+                                    spot_ltp = float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
                                 #print(f"Spot_Token {Spot_Token} spot_ltp {spot_ltp}")
-                                future_ltp = convert_to_float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
+                                future_ltp = float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
                                 
                                 #print(f"{input_symbol} spot ltp = {spot_ltp} future ltp = {future_ltp}")
 
                                 for strike_dict in List_of_particular_expiry_strike:
                                     
-                                    Strike = float(strike_dict.get("strike"))
+                                    Strike = convert_to_float(strike_dict.get("strike"))
                                     #print(Strike)
                                     PE_Token = strike_dict.get("PE_Token")
                                     PE_Token = str(Exchange)+ "|"  + str(PE_Token)
