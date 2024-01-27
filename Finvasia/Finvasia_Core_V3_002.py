@@ -29,8 +29,8 @@ Market_Safety = 1
 import warnings
 warnings.filterwarnings("ignore")
 
-from NorenRestApiPy.NorenApi import NorenApi
-#from Noren import NorenApi
+#from NorenRestApiPy.NorenApi import NorenApi
+from Noren import NorenApi
 import os
 import time
 import json
@@ -1836,7 +1836,8 @@ def start_optionchain():
                                     
                                 #pd_oc.to_csv("pd_oc.csv")                            
                                 #print(pd_oc)
-                                pd_oc = pd_oc.astype({"strike": float})
+                                #pd_oc = pd_oc.astype({"strike": float})
+                                pd_oc['strike'] = pd_oc['strike'].apply(convert_to_float)
                                 pd_oc = pd_oc.sort_values(by="strike", ascending=True)
 
                                 pd_oc = pd_oc.fillna(0)
@@ -2416,15 +2417,15 @@ def start_optionchain_Pro():
                                 #print(f"isFound {isFound} Fut_Token {Fut_Token}")
                                 if Exchange == 'NFO':
                                     isFound, Spot_Token = GetToken('NSE',input_symbol)
-                                    spot_ltp = float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
+                                    spot_ltp = convert_to_float(api.get_quotes("NSE", str(Spot_Token)).get("lp"))
                                 if Exchange == 'BFO':
                                     isFound, Spot_Token = GetToken('BSE',input_symbol)
                                     spot_ltp = convert_to_float(api.get_quotes("BSE", str(Spot_Token)).get("lp"))
                                 else:    
                                     Spot_Token = Fut_Token
-                                    spot_ltp = float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
+                                    spot_ltp = convert_to_float(api.get_quotes(Exchange, str(Spot_Token)).get("lp"))
                                 #print(f"Spot_Token {Spot_Token} spot_ltp {spot_ltp}")
-                                future_ltp = float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
+                                future_ltp = convert_to_float(api.get_quotes(Exchange, str(Fut_Token)).get("lp"))
                                 
                                 #print(f"{input_symbol} spot ltp = {spot_ltp} future ltp = {future_ltp}")
 
@@ -2563,7 +2564,8 @@ def start_optionchain_Pro():
                                     
                                 #pd_oc.to_csv("pd_oc.csv")                            
                                 #print(pd_oc)
-                                pd_oc = pd_oc.astype({"strike": float})
+                                #pd_oc = pd_oc.astype({"strike": float})
+                                pd_oc['strike'] = pd_oc['strike'].apply(convert_to_float)
                                 pd_oc = pd_oc.sort_values(by="strike", ascending=True)
 
                                 pd_oc = pd_oc.fillna(0)
