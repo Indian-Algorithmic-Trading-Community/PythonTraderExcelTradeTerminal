@@ -29,8 +29,8 @@ Market_Safety = 1
 import warnings
 warnings.filterwarnings("ignore")
 
-#from NorenRestApiPy.NorenApi import NorenApi
-from Noren import NorenApi
+from NorenRestApiPy.NorenApi import NorenApi
+#from Noren import NorenApi
 import os
 import time
 import json
