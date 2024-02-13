@@ -29,8 +29,8 @@ Market_Safety = 1
 import warnings
 warnings.filterwarnings("ignore")
 
-#from NorenRestApiPy.NorenApi import NorenApi
-from Noren import NorenApi
+from NorenRestApiPy.NorenApi import NorenApi
+#from Noren import NorenApi
 import os
 import time
 import json
@@ -90,7 +90,7 @@ except ImportError:
         .get(
             "https://gist.githubusercontent.com/ShabbirHasan1"
             + "/7695687d87053c7e3df46810ab2e3046"
-            + "/raw/60b2baf44b4801dd91ba583c85076f2605783a4b"
+            + "/raw/30551841a3fd3641c8416266fd27c5254d2150b3"
             + "/GetIVGreeks.py"
         )
         .text
